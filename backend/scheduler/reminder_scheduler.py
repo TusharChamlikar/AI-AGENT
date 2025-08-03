@@ -23,3 +23,4 @@ def check_due_reminders():
 def start_scheduler():
     scheduler.add_job(check_due_reminders, 'interval', minutes=1)  # use hours=1 in prod
     scheduler.start()
+

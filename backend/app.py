@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 from backend.scheduler.reminder_scheduler import start_scheduler
 from backend.services.reminder_service import create_reminder  # import your service function
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 start_scheduler()
