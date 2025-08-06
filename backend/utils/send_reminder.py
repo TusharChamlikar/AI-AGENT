@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
 from twilio.rest import Client
-
+from urllib.parse import quote  # Import the quote function
 load_dotenv()
 
 def send_reminder(reminder):
@@ -126,42 +126,36 @@ def send_reminder(reminder):
     except Exception as e:
         print(f"❌ ElevenLabs voice error: {e}")
 
-    # === Voice Call via Retell AI ===
-    # === Voice Call via Retell AI ===
-    try:
-        retell_api_key = os.getenv("RETELL_API_KEY")
-        agent_id = os.getenv("RETELL_AGENT_ID")
-        user_phone = reminder.contact
-    
-        if retell_api_key and agent_id and user_phone and user_phone.startswith("+"):
-            retell_payload = {
-                "agent_id": agent_id,
-                "phone_number": user_phone,
-                "custom_data": {
-                    "name": reminder.name,
-                    "amount": reminder.amount,
-                      "due_date": str(reminder.due_date)
-                }
-            }
-    
-            headers = {
-                "Authorization": f"Bearer {retell_api_key}",
-                "Content-Type": "application/json"
-            }
-    
-            retell_response = requests.post(
-                "https://api.retellai.com/v1/call",
-                 headers=headers,
-                 json=retell_payload
-)
+# === Twilio Voice Call ===
+    try: 
+        account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+        auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+        from_number = os.getenv("TWILIO_PHONE_NUMBER")
+        to_number = reminder.contact  # must start with '+'
 
+        if account_sid and auth_token and from_number and to_number and to_number.startswith('+'):
+            client = Client(account_sid, auth_token)
     
-            if retell_response.status_code == 200:
-                data = retell_response.json()
-                print(f"📞 Retell AI call initiated to {user_phone} — Call ID: {data.get('call_id')}")
-            else:
-                print(f"❌ Retell API Error: {retell_response.status_code} — {retell_response.text}")
+            # The message content to be URL-encoded
+            message_content = (
+                f"Hello {reminder.name}, this is a payment reminder. "
+                f"You have ₹{reminder.amount} due on {reminder.due_date}. Please pay on time."
+            )
+
+            # URL-encode the message content
+            encoded_message = quote(message_content)
+
+            # Construct the final TwiML URL with the encoded message
+            twiml_url = f"https://twimlets.com/message?Message={encoded_message}"
+            
+            print(f"DEBUG: TwiML URL being used: {twiml_url}")
+            call = client.calls.create(
+                            url=twiml_url,
+                            to=to_number,
+                            from_=from_number
+            )
+            print(f"📞 Twilio voice call placed to {to_number} — Call SID: {call.sid}")
         else:
-            print("⚠️ Retell AI skipped: missing config or invalid phone number")
+            print("⚠️ Twilio Voice skipped: missing config or invalid phone number")
     except Exception as e:
-        print(f"❌ Retell AI exception: {e}")
+        print(f"❌ Twilio Voice error: {e}")
