@@ -2,13 +2,14 @@ from backend.models.reminder_model import Reminder
 from backend.db import SessionLocal
 from datetime import date
 
-def create_reminder(name, amount, due_date, contact):
+def create_reminder(name, amount, due_date, email,mobile):
     db = SessionLocal()
     reminder = Reminder(
         name=name,
         amount=amount,
         due_date=due_date,
-        contact=contact
+        email=email,
+        mobile=mobile
     )
     db.add(reminder)
     db.commit()

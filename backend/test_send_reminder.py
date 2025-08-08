@@ -12,7 +12,7 @@ load_dotenv()
 
 # Mock Reminder class
 class Reminder:
-    def __init__(self, name, amount, due_date, contact):
+    def __init__(self, name, amount, due_date, contact,email,mobile):
         self.name = name
         self.amount = amount
         self.due_date = due_date

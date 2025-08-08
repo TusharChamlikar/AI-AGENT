@@ -18,7 +18,7 @@ def send_reminder(reminder):
     try:
         sg_api_key = os.getenv("SENDGRID_API_KEY")
         from_email = os.getenv("FROM_EMAIL")
-        to_email = reminder.contact
+        to_email = reminder.email
 
         if sg_api_key and from_email and to_email and "@" in to_email:
             message = Mail(
@@ -45,7 +45,7 @@ def send_reminder(reminder):
         twilio_sid = os.getenv("TWILIO_ACCOUNT_SID")
         twilio_token = os.getenv("TWILIO_AUTH_TOKEN")
         from_number = os.getenv("TWILIO_PHONE_NUMBER")
-        to_number = reminder.contact
+        to_number = reminder.mobile
 
         if twilio_sid and twilio_token and from_number and to_number and to_number.startswith("+"):
             client = Client(twilio_sid, twilio_token)
@@ -131,7 +131,7 @@ def send_reminder(reminder):
         account_sid = os.getenv("TWILIO_ACCOUNT_SID")
         auth_token = os.getenv("TWILIO_AUTH_TOKEN")
         from_number = os.getenv("TWILIO_PHONE_NUMBER")
-        to_number = reminder.contact  # must start with '+'
+        to_number = reminder.mobile  # must start with '+'
 
         if account_sid and auth_token and from_number and to_number and to_number.startswith('+'):
             client = Client(account_sid, auth_token)
