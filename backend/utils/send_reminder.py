@@ -5,12 +5,41 @@ from dotenv import load_dotenv
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
 from twilio.rest import Client
-from urllib.parse import quote  # Import the quote function
+from urllib.parse import quote
+from openai import OpenAI  # ✅ Added for AI-generated SMS
+
 load_dotenv()
+
+# Initialize OpenAI
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def generate_smart_sms(reminder):
+    """Use OpenAI to generate a short, friendly SMS."""
+    prompt = f"""
+    Write a concise, friendly payment reminder for {reminder.name}.
+    Amount due: ₹{reminder.amount}
+    Due date: {reminder.due_date}
+    Keep it under 160 characters, polite, and clear.
+    """
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",  # lightweight, fast
+            messages=[
+                {"role": "system", "content": "You are an assistant that writes concise, friendly SMS reminders."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"⚠️ OpenAI SMS generation failed: {e}")
+        # Fallback: normal static message
+        return f"Reminder: ₹{reminder.amount} is due on {reminder.due_date}, {reminder.name}."
 
 def send_reminder(reminder):
     """
-    Sends a reminder via Email (SendGrid), SMS (Twilio), and Voice (ElevenLabs with MP3 email attachment).
+    Sends a reminder via Email (SendGrid), SMS (Twilio with OpenAI),
+    and Voice (ElevenLabs with MP3 email attachment), plus Twilio voice call.
     """
     print(f"🔔 Reminder: {reminder.name}, ₹{reminder.amount} due on {reminder.due_date}")
 
@@ -40,7 +69,7 @@ def send_reminder(reminder):
     except Exception as e:
         print(f"❌ Email error: {e}")
 
-    # === SMS Reminder ===
+    # === SMS Reminder with OpenAI ===
     try:
         twilio_sid = os.getenv("TWILIO_ACCOUNT_SID")
         twilio_token = os.getenv("TWILIO_AUTH_TOKEN")
@@ -49,8 +78,9 @@ def send_reminder(reminder):
 
         if twilio_sid and twilio_token and from_number and to_number and to_number.startswith("+"):
             client = Client(twilio_sid, twilio_token)
+            sms_body = generate_smart_sms(reminder)  # ✅ AI-generated
             message = client.messages.create(
-                body=f"Reminder: ₹{reminder.amount} is due on {reminder.due_date}, {reminder.name}.",
+                body=sms_body,
                 from_=from_number,
                 to=to_number
             )
@@ -126,7 +156,7 @@ def send_reminder(reminder):
     except Exception as e:
         print(f"❌ ElevenLabs voice error: {e}")
 
-# === Twilio Voice Call ===
+    # === Twilio Voice Call ===
     try: 
         account_sid = os.getenv("TWILIO_ACCOUNT_SID")
         auth_token = os.getenv("TWILIO_AUTH_TOKEN")
@@ -136,16 +166,12 @@ def send_reminder(reminder):
         if account_sid and auth_token and from_number and to_number and to_number.startswith('+'):
             client = Client(account_sid, auth_token)
     
-            # The message content to be URL-encoded
             message_content = (
                 f"Hello {reminder.name}, this is a payment reminder. "
                 f"You have ₹{reminder.amount} due on {reminder.due_date}. Please pay on time."
             )
 
-            # URL-encode the message content
             encoded_message = quote(message_content)
-
-            # Construct the final TwiML URL with the encoded message
             twiml_url = f"https://twimlets.com/message?Message={encoded_message}"
             
             print(f"DEBUG: TwiML URL being used: {twiml_url}")
