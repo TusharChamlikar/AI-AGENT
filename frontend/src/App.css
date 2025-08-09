@@ -1,0 +1,6 @@
+/* The .app-container rule must be removed from this file. */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
