@@ -11,7 +11,7 @@ A sophisticated, multi-channel communication platform engineered to streamline a
 - **Project Title:** Fin-Minder: AI-Powered Payment Reminder Agent  
 - **Team Name:** Hello World  
 - **Team Members:** Vishwasjeet Kumar Gupta, Tushar Kumar Chamlikar, Nishu Kumar  
-- **Submission Date:** August 9, 2025  
+- **Submission Date:** August 10, 2025  
 
 ---
 
