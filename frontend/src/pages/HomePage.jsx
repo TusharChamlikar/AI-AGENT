@@ -160,7 +160,7 @@ const DemoSection = () => (
                 <div className="max-w-3xl mx-auto bg-gray-900 rounded-lg overflow-hidden shadow-lg aspect-video">
                     <iframe 
                         className="w-full h-full"
-                        src="https://www.youtube.com/embed/RspBm9Comh0?si=5BH7UZpo9pL-aje_"
+                        src="https://www.youtube.com/embed/joMKRnmgq20?si=w17TQuQe-gckxxgr"
                         title="YouTube video player" 
                         frameBorder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
