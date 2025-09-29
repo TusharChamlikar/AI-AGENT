@@ -43,7 +43,7 @@ export default function AddReminder() {
     }
   };
 
-  // The component's structure is now styled with Tailwind classes
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-100 to-blue-100 p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 md:p-8">
